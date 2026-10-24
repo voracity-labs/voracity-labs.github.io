@@ -1,35 +1,35 @@
-/* Voracity Labs styles. The page works without JS; scripts only add
-   classes and attributes. Only opacity, transform, border-color and
-   box-shadow are animated. */
+/* Voracity Labs — light paper field. Scripts only add classes/attributes. */
 
 /* ---------- Theme tokens ---------- */
 :root {
-  --bg: #07090F;
-  --surface: #0E121B;
-  --surface-92: rgba(14, 18, 27, 0.92);
-  --text: #E8ECF4;
-  --text-muted: #C9D1DE;
-  --accent: #7CF7C5;
-  --accent-2: #8B7CFF;
-  --plate: rgba(7, 9, 15, 0.72);
-  --nav-h: 64px;
+  --bg: #f7f7f5;
+  --bg-grid: #e4e4e0;
+  --surface: #ffffff;
+  --surface-92: rgba(247, 247, 245, 0.92);
+  --text: #111111;
+  --text-muted: #6b6b6b;
+  --accent: #111111;
+  --accent-soft: #8b7cff;
+  --rule: rgba(17, 17, 17, 0.12);
+  --nav-h: 88px;
 
   --max-w: 1440px;
-  --gutter: clamp(16px, 4vw, 32px);
-  --radius: 12px;
+  --gutter: clamp(16px, 4vw, 40px);
   --target: 44px;
 
-  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue",
-    Arial, "Noto Sans", sans-serif;
+  --font-sans: "IBM Plex Sans", "Segoe UI", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
 
-  color-scheme: dark;
+  color-scheme: light;
 }
 
-/* Without JS on mobile, the nav links wrap onto a second header row, so the
-   header (and the scroll offset under it) is taller. */
 @media (max-width: 767px) {
+  :root {
+    --nav-h: 96px;
+  }
+
   html:not(.js-nav) {
-    --nav-h: 112px;
+    --nav-h: 148px;
   }
 }
 
@@ -45,7 +45,6 @@ html {
   text-size-adjust: 100%;
 }
 
-/* Smooth scrolling only when the visitor has not asked for reduced motion. Reduced-motion visitors get an instant jump. */
 @media (prefers-reduced-motion: no-preference) {
   html {
     scroll-behavior: smooth;
@@ -55,10 +54,15 @@ html {
 body {
   margin: 0;
   min-width: 320px;
-  background: var(--bg);
+  background-color: var(--bg);
+  background-image:
+    linear-gradient(var(--bg-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--bg-grid) 1px, transparent 1px);
+  background-size: 28px 28px;
+  background-position: -1px -1px;
   color: var(--text);
   font-family: var(--font-sans);
-  font-size: 1rem; /* 16px base, never smaller for body text */
+  font-size: 1rem;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   overflow-wrap: break-word;
@@ -77,8 +81,9 @@ h1,
 h2,
 h3 {
   line-height: 1.15;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.02em;
   color: var(--text);
+  font-weight: 600;
 }
 
 img,
@@ -89,32 +94,29 @@ canvas {
 }
 
 a {
-  color: var(--accent);
+  color: var(--text);
 }
 
-/* Fixed header must never cover a section heading. */
 section[id] {
   scroll-margin-top: var(--nav-h);
 }
 
-/* main and sections take focus from scripts only; no ring needed. */
 main:focus,
 section[tabindex="-1"]:focus {
   outline: none;
 }
 
-/* Keyboard focus indicator: 2px mint ring, > 3:1 on --bg and --surface. */
 :focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--text);
   outline-offset: 2px;
 }
 
 /* ---------- Layout container ---------- */
 .container {
   width: 100%;
-  max-width: var(--max-w); /* 1440px */
+  max-width: 42rem;
   margin-inline: auto;
-  padding-inline: var(--gutter); /* <= 32px per side */
+  padding-inline: var(--gutter);
 }
 
 /* ---------- Skip link ---------- */
@@ -128,8 +130,8 @@ section[tabindex="-1"]:focus {
   min-block-size: var(--target);
   min-inline-size: var(--target);
   padding: 0 16px;
-  border-radius: 8px;
-  background: var(--accent);
+  border-radius: 4px;
+  background: var(--text);
   color: var(--bg);
   font-weight: 600;
   text-decoration: none;
@@ -141,7 +143,7 @@ section[tabindex="-1"]:focus {
 }
 
 .skip-link:focus-visible {
-  outline-color: var(--text);
+  outline-color: var(--accent-soft);
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -157,47 +159,57 @@ section[tabindex="-1"]:focus {
   z-index: 100;
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
-  column-gap: 16px;
+  column-gap: 24px;
+  row-gap: 8px;
   min-block-size: var(--nav-h);
-  padding-block: 8px;
-  /* Align header content with the 1440px content column on wide screens. */
+  padding-block: 20px 12px;
   padding-inline: max(var(--gutter), calc((100% - var(--max-w)) / 2 + var(--gutter)));
   background-color: transparent;
   border-bottom: 1px solid transparent;
 }
 
-/* Solid background once scrolled past 50px. */
 .site-header[data-scrolled="true"] {
   background-color: var(--surface-92);
-  border-bottom-color: rgba(139, 124, 255, 0.18);
+  border-bottom-color: var(--rule);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+}
+
+.brand {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  min-width: 0;
 }
 
 .wordmark {
   display: inline-flex;
   align-items: center;
-  min-block-size: var(--target);
-  min-inline-size: var(--target);
+  min-block-size: 28px;
   color: var(--text);
-  font-weight: 700;
-  font-size: 1.125rem;
-  letter-spacing: 0.01em;
   text-decoration: none;
-  white-space: nowrap;
 }
 
-/* SVG wordmark matching the brand logo (crossbarless A, heavy/light split).
-   Height scales down on narrow screens so it fits beside the menu toggle. */
 .wordmark-logo {
-  height: clamp(14px, 4.5vw, 20px);
+  height: clamp(18px, 3.6vw, 26px);
   width: auto;
   aspect-ratio: 1236 / 112;
-  max-width: none;
+  max-width: min(100%, 340px);
 }
 
-/* Hidden holder for the shared <symbol> logo. Not display:none, so <use>
-   references render reliably in every browser. */
+.brand-tagline {
+  max-width: 22rem;
+  color: var(--text-muted);
+  font-family: var(--font-sans);
+  font-size: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
+  font-weight: 400;
+  line-height: 1.35;
+  letter-spacing: 0.01em;
+}
+
 .sprite {
   position: absolute;
   width: 0;
@@ -205,7 +217,6 @@ section[tabindex="-1"]:focus {
   overflow: hidden;
 }
 
-/* Text kept for screen readers and search engines, visually replaced. */
 .visually-hidden {
   position: absolute;
   width: 1px;
@@ -218,18 +229,6 @@ section[tabindex="-1"]:focus {
   border: 0;
 }
 
-/* Hero wordmark: fills the plate width, capped so it never dominates. */
-.hero-logo {
-  display: block;
-  width: min(100%, 40rem);
-  height: auto;
-  aspect-ratio: 1236 / 112;
-  margin-inline: auto;
-  color: var(--text);
-}
-
-/* Toggle is only shown under html.js-nav on mobile (see below). The HTML
-   `hidden` attribute is respected until nav.js removes it. */
 .nav-toggle {
   display: none;
   align-items: center;
@@ -237,24 +236,24 @@ section[tabindex="-1"]:focus {
   min-block-size: var(--target);
   min-inline-size: var(--target);
   padding: 0 14px;
-  border: 1px solid rgba(232, 236, 244, 0.28);
-  border-radius: 8px;
+  border: 1px solid var(--rule);
+  border-radius: 4px;
   background: transparent;
   color: var(--text);
   font: inherit;
-  font-weight: 600;
+  font-weight: 500;
   cursor: pointer;
 }
 
 .nav-toggle[aria-expanded="true"] {
-  border-color: var(--accent);
+  border-color: var(--text);
 }
 
 #nav-links {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 4px;
+  gap: 4px 8px;
   padding: 0;
   list-style: none;
 }
@@ -266,10 +265,14 @@ section[tabindex="-1"]:focus {
   justify-content: center;
   min-block-size: var(--target);
   min-inline-size: var(--target);
-  padding-inline: 12px;
+  padding-inline: 10px;
   color: var(--text-muted);
-  font-weight: 500;
+  font-family: var(--font-sans);
+  font-size: 0.9375rem;
+  font-weight: 400;
+  letter-spacing: 0.01em;
   text-decoration: none;
+  text-transform: lowercase;
   white-space: nowrap;
 }
 
@@ -277,16 +280,14 @@ section[tabindex="-1"]:focus {
   color: var(--text);
 }
 
-/* Active indicator: underline bar + heavier weight, not color alone. */
 #nav-links a::after {
   content: "";
   position: absolute;
-  left: 12px;
-  right: 12px;
-  bottom: 8px;
-  height: 2px;
-  border-radius: 1px;
-  background: var(--accent);
+  left: 10px;
+  right: 10px;
+  bottom: 10px;
+  height: 1px;
+  background: var(--text);
   transform: scaleX(0);
   transform-origin: left center;
 }
@@ -294,7 +295,7 @@ section[tabindex="-1"]:focus {
 #nav-links a.is-active,
 #nav-links a[aria-current="true"] {
   color: var(--text);
-  font-weight: 700;
+  font-weight: 500;
 }
 
 #nav-links a.is-active::after,
@@ -308,8 +309,6 @@ section[tabindex="-1"]:focus {
   }
 }
 
-/* Mobile, no JS (baseline): links stay visible as a compact wrapping row
-   beneath the wordmark. */
 @media (max-width: 767px) {
   html:not(.js-nav) .site-header nav {
     flex-basis: 100%;
@@ -329,13 +328,14 @@ section[tabindex="-1"]:focus {
     right: 6px;
   }
 
-  /* Mobile with JS: toggle menu. Links hidden unless open. */
   html.js-nav .site-header {
     flex-wrap: nowrap;
+    align-items: center;
   }
 
   html.js-nav .nav-toggle:not([hidden]) {
     display: inline-flex;
+    margin-left: auto;
   }
 
   html.js-nav #nav-links {
@@ -349,7 +349,7 @@ section[tabindex="-1"]:focus {
     gap: 0;
     padding: 8px var(--gutter) 16px;
     background: var(--surface);
-    border-bottom: 1px solid rgba(139, 124, 255, 0.18);
+    border-bottom: 1px solid var(--rule);
   }
 
   html.js-nav #nav-links[data-open="true"] {
@@ -369,7 +369,6 @@ section[tabindex="-1"]:focus {
   }
 }
 
-/* Desktop: links always visible, toggle always hidden. */
 @media (min-width: 768px) {
   .nav-toggle,
   .nav-toggle:not([hidden]) {
@@ -378,30 +377,25 @@ section[tabindex="-1"]:focus {
 
   #nav-links {
     display: flex;
+    padding-top: 2px;
   }
 }
 
-/* ---------- Hero ---------- */
+/* ---------- Hero / gravity field ---------- */
 .hero {
   position: relative;
   isolation: isolate;
-  display: grid;
-  place-items: center;
-  /* minmax(0, ...) so the logo's intrinsic SVG width can't widen the column. */
-  grid-template-columns: minmax(0, 1fr);
   min-height: 100vh;
   min-height: 100svh;
-  padding-block: calc(var(--nav-h) + 16px) 32px;
-  padding-inline: var(--gutter);
+  padding-block: var(--nav-h) 0;
   overflow: hidden;
-  /* Static fallback background, visible without JS / canvas. */
+  /* Soft fallback when canvas fails — still reads as a field on paper. */
   background:
-    radial-gradient(ellipse 70% 60% at 22% 30%, rgba(139, 124, 255, 0.20), transparent 70%),
-    radial-gradient(ellipse 60% 55% at 80% 72%, rgba(124, 247, 197, 0.12), transparent 70%),
-    var(--bg);
+    radial-gradient(ellipse 55% 50% at 50% 48%, rgba(139, 124, 255, 0.08), transparent 70%),
+    radial-gradient(ellipse 40% 40% at 20% 70%, rgba(45, 155, 122, 0.06), transparent 65%),
+    transparent;
 }
 
-/* Canvas fills the hero behind the text plate. */
 .hero-canvas {
   position: absolute;
   inset: 0;
@@ -415,241 +409,46 @@ html.hero-fallback .hero-canvas {
   display: none;
 }
 
-/* Text plate guarantees contrast regardless of canvas content. */
-.hero-plate {
-  position: relative;
-  z-index: 1;
-  width: 100%;
-  max-width: 46rem;
-  padding: clamp(20px, 3.5vw, 48px);
-  border: 1px solid rgba(232, 236, 244, 0.08);
-  border-radius: 16px;
-  background: var(--plate);
-  text-align: center;
-}
-
-@supports ((-webkit-backdrop-filter: blur(6px)) or (backdrop-filter: blur(6px))) {
-  .hero-plate {
-    -webkit-backdrop-filter: blur(6px);
-    backdrop-filter: blur(6px);
-  }
-}
-
-/* Typography scales with both width and height so h1, tagline and CTA fit
-   in the initial viewport from 320 to 2560px. */
-.hero h1 {
-  font-size: clamp(2rem, min(1.25rem + 5vw, 11vh), 5.5rem);
-  font-weight: 800;
-  letter-spacing: -0.02em;
-}
-
-.tagline {
-  margin-top: clamp(8px, 2vh, 20px);
-  color: var(--text-muted);
-  font-size: clamp(1rem, min(0.9rem + 0.8vw, 3.2vh), 1.625rem);
-  line-height: 1.45;
-}
-
-.cta {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-block-size: var(--target);
-  min-inline-size: var(--target);
-  margin-top: clamp(16px, 3.5vh, 32px);
-  padding: 10px 22px;
-  border: 1px solid var(--accent);
-  border-radius: 999px;
-  background: var(--accent);
-  color: var(--bg);
-  font-size: 1rem;
-  font-weight: 700;
-  text-decoration: none;
-  box-shadow: 0 0 0 0 rgba(124, 247, 197, 0);
-}
-
-.cta:hover {
-  box-shadow: 0 0 0 4px rgba(124, 247, 197, 0.22);
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .cta {
-    transition: box-shadow 200ms ease;
-  }
-}
-
 /* ---------- Content sections ---------- */
 main > section:not(.hero) {
-  padding-block: clamp(64px, 10vw, 128px);
-}
-
-main > section:not(.hero) + section {
-  border-top: 1px solid rgba(232, 236, 244, 0.06);
+  position: relative;
+  z-index: 1;
+  padding-block: clamp(72px, 12vw, 128px);
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  border-top: 1px solid var(--rule);
 }
 
 h2 {
-  font-size: clamp(1.75rem, 1.35rem + 1.6vw, 2.75rem);
-  font-weight: 700;
+  font-family: var(--font-mono);
+  font-size: clamp(1.25rem, 1.1rem + 0.6vw, 1.5rem);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  text-transform: lowercase;
 }
 
-h2 + p,
-h2 + ol,
-h2 + ul {
-  margin-top: clamp(16px, 3vw, 32px);
+h2 + p {
+  margin-top: clamp(16px, 3vw, 28px);
 }
 
 .container > p {
-  max-width: 70ch;
   color: var(--text-muted);
-  font-size: clamp(1rem, 0.95rem + 0.35vw, 1.25rem);
-}
-
-.container > p + p {
-  margin-top: 16px;
-}
-
-h3 {
-  font-size: 1.25rem;
-  font-weight: 650;
-}
-
-h3 + p {
-  margin-top: 8px;
-  color: var(--text-muted);
-}
-
-/* ---------- Approach steps ---------- */
-.steps {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 24px;
-  padding: 0;
-  list-style: none;
-  counter-reset: step;
-}
-
-.steps > li {
-  position: relative;
-  min-width: 0;
-  padding-top: 52px;
-  counter-increment: step;
-}
-
-/* Visible sequence number starting at 1. */
-.steps > li::before {
-  content: counter(step);
-  position: absolute;
-  top: 0;
-  left: 0;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  border: 1px solid var(--accent);
-  border-radius: 50%;
-  color: var(--accent);
-  font-size: 1rem;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-}
-
-@media (min-width: 768px) {
-  .steps {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 32px;
-  }
-}
-
-@media (min-width: 1100px) {
-  .steps {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
-}
-
-/* ---------- Focus area cards ---------- */
-.cards {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 20px;
-  padding: 0;
-  list-style: none;
-}
-
-@media (min-width: 768px) {
-  .cards {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 24px;
-  }
-}
-
-@media (min-width: 1100px) {
-  .cards {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-}
-
-.card {
-  min-width: 0;
-  padding: clamp(20px, 2.5vw, 32px);
-  border: 1px solid rgba(139, 124, 255, 0.28);
-  border-radius: var(--radius);
-  background: var(--surface);
-  box-shadow: 0 0 0 0 rgba(139, 124, 255, 0);
-  /* Highlight in and out over 250ms. */
-  transition:
-    transform 250ms ease,
-    border-color 250ms ease,
-    box-shadow 250ms ease;
-}
-
-.card:hover,
-.card:focus-within {
-  transform: translateY(-4px);
-  border-color: var(--accent-2);
-  box-shadow: 0 12px 32px -12px rgba(139, 124, 255, 0.45);
-}
-
-/* ---------- Contact ---------- */
-.email {
-  display: inline-flex;
-  align-items: center;
-  min-block-size: var(--target);
-  min-inline-size: var(--target);
-  color: var(--accent);
-  font-size: clamp(1.125rem, 1rem + 1vw, 1.75rem);
-  font-weight: 600;
-  text-decoration: underline;
-  text-decoration-thickness: 1px;
-  text-underline-offset: 4px;
-  overflow-wrap: anywhere;
-}
-
-.email:hover {
-  text-decoration-thickness: 2px;
+  font-size: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+  line-height: 1.65;
 }
 
 /* ---------- Footer ---------- */
 .site-footer {
-  padding-block: 32px;
-  border-top: 1px solid rgba(232, 236, 244, 0.08);
+  padding-block: 28px;
+  border-top: 1px solid var(--rule);
   color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
 }
 
-.site-footer a {
-  display: inline-flex;
-  align-items: center;
-  min-block-size: var(--target);
-  min-inline-size: var(--target);
-  color: var(--text);
-}
-
-/* ---------- Reveal animation ----------
-   Hidden state is applied by reveal.js only to below-fold targets, so with
-   no JS (or failed JS) everything stays at opacity 1, no offset. */
+/* ---------- Reveal animation ---------- */
 .reveal-pending {
   opacity: 0;
-  transform: translateY(24px);
+  transform: translateY(16px);
 }
 
 .reveal-in {
@@ -661,46 +460,11 @@ h3 + p {
   transition-delay: var(--reveal-delay, 0ms);
 }
 
-/* Cards reveal with a keyframe animation so their hover transition stays 250ms. */
-.card.reveal-in {
-  transition:
-    transform 250ms ease,
-    border-color 250ms ease,
-    box-shadow 250ms ease;
-  transition-delay: 0ms;
-  animation: card-reveal 600ms cubic-bezier(0.2, 0.7, 0.2, 1) var(--reveal-delay, 0ms) backwards;
-}
-
-@keyframes card-reveal {
-  from {
-    opacity: 0;
-    transform: translateY(24px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-
-/* ---------- Reduced motion ---------- */
 @media (prefers-reduced-motion: reduce) {
   .reveal-pending,
   .reveal-in {
     opacity: 1;
     transform: none;
     transition: none;
-    animation: none;
-  }
-
-  /* Card highlight keeps border + shadow, but with no movement and 0ms. */
-  .card,
-  .card.reveal-in {
-    transition-duration: 0ms;
-    animation: none;
-  }
-
-  .card:hover,
-  .card:focus-within {
-    transform: none;
   }
 }

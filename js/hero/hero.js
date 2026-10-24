@@ -13,11 +13,11 @@ import {
 import { PALETTE } from './palette.js';
 
 const SEED = 0x5eed1ab5;          // fixed seed: same field on every load
-const LINK_ALPHA = 0.32;          // peak link alpha outside the lens
-const LINK_LENS_BOOST = 0.4;      // extra link alpha at the lens center, full strength
-const NODE_ALPHA = 0.7;           // base node alpha
-const NODE_GLOW_ALPHA = 0.3;      // extra node alpha at full glow
-const PULSE_LINK_ALPHA = 0.85;
+const LINK_ALPHA = 0.42;          // peak link alpha outside the lens (light bg)
+const LINK_LENS_BOOST = 0.35;     // extra link alpha at the lens center, full strength
+const NODE_ALPHA = 0.78;          // base node alpha
+const NODE_GLOW_ALPHA = 0.22;     // extra node alpha at full glow
+const PULSE_LINK_ALPHA = 0.9;
 const PULSE_HEAD_R = 2.4;         // CSS px
 const ALPHA_BUCKETS = 10;         // links are batched into this many alpha levels
 

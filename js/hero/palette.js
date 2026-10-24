@@ -1,11 +1,12 @@
-// Hero colors. The canvas only draws with these, so text on the plate stays readable.
+// Hero colors tuned for the light paper background.
+// Violet / mint kept from the original field so the system still reads as ours.
 
 export const PALETTE = {
-  node:  ['#8B7CFF', '#7CF7C5'], // violet, mint
-  link:  '#8B7CFF',
-  pulse: '#7CF7C5',
-  maxAlpha: 1.0,
+  node:  ['#5B4FCF', '#2A9B7A'], // deep violet, deep mint
+  link:  '#6B63B8',
+  pulse: '#2A9B7A',
+  maxAlpha: 0.9,
 };
-export const HERO_TEXT = { primary: '#E8ECF4', muted: '#C9D1DE' };
-export const PLATE = { color: '#07090F', alpha: 0.72 };
-export const CTA = { bg: '#7CF7C5', fg: '#07090F' };   // opaque, independent of canvas
+export const HERO_TEXT = { primary: '#111111', muted: '#6B6B6B' };
+export const PLATE = { color: '#F7F7F5', alpha: 0.0 };
+export const CTA = { bg: '#111111', fg: '#F7F7F5' };

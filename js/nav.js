@@ -4,7 +4,7 @@ import { navReducer, initialNavState, ariaExpanded } from './lib/nav-state.js';
 import { isScrolled, selectActiveSection } from './lib/active-section.js';
 import { MOBILE_MAX } from './lib/sizing.js';
 
-const SECTION_IDS = ['mission', 'approach', 'focus', 'contact'];
+const SECTION_IDS = ['research', 'systems', 'publications', 'about'];
 const DESKTOP_QUERY = `(min-width: ${MOBILE_MAX + 1}px)`;
 
 /**

@@ -1,9 +1,9 @@
 // Sizing rules for the hero canvas.
 
 export const MOBILE_MAX = 767;
-export const DENSITY_PX2 = 9000;
-export const MIN_NODES = 40;
-export const MAX_NODES = 180;
+export const DENSITY_PX2 = 5200;
+export const MIN_NODES = 60;
+export const MAX_NODES = 240;
 
 const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
 
