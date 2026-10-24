@@ -414,6 +414,9 @@ html.hero-fallback .hero-canvas {
   position: absolute;
   inset: var(--nav-h) var(--gutter) 0;
   z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
   padding-block: clamp(12px, 3vh, 32px) clamp(24px, 5vh, 48px);
   pointer-events: none;
 }
@@ -423,7 +426,7 @@ html.hero-fallback .hero-canvas {
   top: clamp(12px, 3vh, 32px);
   left: 0;
   width: min(100%, 36rem);
-  max-height: calc(100% - clamp(12px, 3vh, 32px) - clamp(24px, 5vh, 48px));
+  max-height: calc(100% - clamp(12px, 3vh, 32px) - clamp(24px, 5vh, 48px) - 3rem);
   overflow: auto;
   pointer-events: none;
   opacity: 0;
@@ -433,6 +436,9 @@ html.hero-fallback .hero-canvas {
 
 .panel.is-open,
 .panel:target {
+  position: relative;
+  top: auto;
+  max-height: calc(100svh - var(--nav-h) - 6rem);
   opacity: 1;
   visibility: visible;
   transform: none;
@@ -473,6 +479,67 @@ html.js-nav .panel:target:not(.is-open) {
   line-height: 1.65;
 }
 
+/* Segmented progress under the open panel: fills over the dwell time. */
+.panel-indicator {
+  position: relative;
+  display: flex;
+  gap: 6px;
+  width: min(100%, 36rem);
+  margin-top: 14px;
+  pointer-events: auto;
+}
+
+.panel-indicator-item {
+  flex: 1 1 0;
+  display: block;
+  min-block-size: var(--target);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.panel-indicator-track {
+  display: block;
+  width: 100%;
+  height: 2px;
+  margin-top: calc((var(--target) - 2px) / 2);
+  overflow: hidden;
+  background: rgba(17, 17, 17, 0.16);
+}
+
+.panel-indicator-fill {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: var(--text);
+  transform: scaleX(0);
+  transform-origin: left center;
+}
+
+.panel-indicator-item.is-done .panel-indicator-fill {
+  transform: scaleX(1);
+}
+
+.panel-indicator-item.is-active .panel-indicator-fill {
+  transform: scaleX(1);
+}
+
+.panel-stage.is-rotating .panel-indicator-item.is-active .panel-indicator-fill {
+  transform: scaleX(0);
+  animation: panel-indicator-fill var(--panel-rotate-ms, 5000ms) linear forwards;
+}
+
+.panel-indicator-item:not(.is-active):not(.is-done) .panel-indicator-fill {
+  transform: scaleX(0);
+}
+
+@keyframes panel-indicator-fill {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
 @media (prefers-reduced-motion: no-preference) {
   .panel {
     transition:
@@ -487,6 +554,13 @@ html.js-nav .panel:target:not(.is-open) {
       opacity 220ms ease,
       transform 280ms cubic-bezier(0.2, 0.7, 0.2, 1),
       visibility 0s;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .panel-stage.is-rotating .panel-indicator-item.is-active .panel-indicator-fill {
+    animation: none;
+    transform: scaleX(1);
   }
 }
 
