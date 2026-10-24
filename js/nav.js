@@ -47,6 +47,11 @@ const LINK_PREVIEWS = {
     title: 'Early-2025 AI coding tools study',
     desc: 'RCT: early-2025 AI tools increased task completion time by 19% for experienced developers in familiar repos.',
   },
+  'https://github.com/voracity-labs': {
+    kicker: 'github.com',
+    title: 'voracity-labs',
+    desc: 'Public repositories for Voracity Labs on GitHub.',
+  },
 };
 
 /**
