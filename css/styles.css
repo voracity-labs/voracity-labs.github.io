@@ -507,14 +507,55 @@ html.js-nav .panel:target:not(.is-open) {
   text-transform: lowercase;
 }
 
-#contact h2 + p {
+.contact-form {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 12px;
   margin-top: clamp(16px, 3vw, 28px);
+  max-width: 36rem;
 }
 
-.container > p {
+.contact-form textarea {
+  width: 100%;
+  min-height: 8rem;
+  padding: 14px 16px;
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: 1rem;
+  line-height: 1.5;
+  resize: vertical;
+}
+
+.contact-form textarea::placeholder {
   color: var(--text-muted);
-  font-size: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
-  line-height: 1.65;
+}
+
+.contact-form textarea:focus-visible {
+  outline: 2px solid var(--text);
+  outline-offset: 2px;
+}
+
+.contact-send {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-block-size: var(--target);
+  min-inline-size: var(--target);
+  padding: 0 20px;
+  border: 1px solid var(--text);
+  border-radius: 4px;
+  background: var(--text);
+  color: var(--bg);
+  font: inherit;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  cursor: default;
 }
 
 /* ---------- Footer ---------- */
@@ -524,6 +565,50 @@ html.js-nav .panel:target:not(.is-open) {
   color: var(--text-muted);
   font-family: var(--font-mono);
   font-size: 0.8125rem;
+}
+
+.footer-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 24px;
+  max-width: var(--max-w);
+}
+
+.footer-bar p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.8125rem;
+}
+
+.social-links {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.social-links a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-block-size: var(--target);
+  min-inline-size: var(--target);
+  color: var(--text-muted);
+  text-decoration: none;
+}
+
+.social-links a:hover {
+  color: var(--text);
+}
+
+.social-icon {
+  width: 20px;
+  height: 20px;
+  display: block;
 }
 
 /* ---------- Reveal animation ---------- */
