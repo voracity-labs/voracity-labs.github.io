@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Example post layout | Voracity Labs</title>
+  <meta name="description" content="Template for a Voracity Labs blog post.">
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#post">Skip to content</a>
+
+  <header class="site-header" data-scrolled="false">
+    <div class="brand">
+      <a class="wordmark" href="../index.html#top" aria-label="Voracity Labs">
+        <img class="wordmark-logo" src="../assets/logo-wordmark.png" width="469" height="49" alt="Voracity Labs">
+      </a>
+      <p class="brand-tagline">at a profit if we can; at a loss if we must</p>
+    </div>
+    <nav aria-label="Primary">
+      <ul id="nav-links">
+        <li><a href="../index.html#mission">mission</a></li>
+        <li><a href="../index.html#projects">projects</a></li>
+        <li><a href="../index.html#blog" aria-current="true">blog</a></li>
+        <li><a href="../index.html#contact">contact</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main id="post" class="post-page" tabindex="-1">
+    <a class="post-page-back" href="../index.html#blog">← blog</a>
+    <time datetime="2026-01-01">2026-01-01</time>
+    <h1>Example post layout</h1>
+    <div class="post-body">
+      <p>This is a template post. Duplicate <code>posts/example.html</code>, rename it, replace the title and body, then link it from the blog list in <code>index.html</code> (swap a placeholder row for an <code>&lt;a class="post-card" href="posts/your-slug.html"&gt;</code>).</p>
+      <p>Posts are static files in this repo — there is no public posting UI. Publish by editing and pushing to GitHub Pages.</p>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-bar">
+      <p>&copy; <span data-year>2025</span> Voracity Labs</p>
+    </div>
+  </footer>
+  <script type="module">
+    document.querySelectorAll('[data-year]').forEach((el) => {
+      el.textContent = String(new Date().getFullYear());
+    });
+  </script>
+</body>
+</html>
