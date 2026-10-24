@@ -25,6 +25,30 @@ const FOUNDERS = {
   },
 };
 
+/** Hover cards for citation / external links in panel copy. */
+const LINK_PREVIEWS = {
+  'https://sre.google/': {
+    kicker: 'sre.google',
+    title: 'Site Reliability Engineering',
+    desc: 'Google’s SRE practices: availability, latency, performance, and capacity as measurable engineering concerns.',
+  },
+  'https://csrc.nist.gov/pubs/sp/800/218/final': {
+    kicker: 'csrc.nist.gov',
+    title: 'Secure Software Development Framework',
+    desc: 'NIST SP 800-218 — practices for reducing vulnerabilities and integrating security through the SDLC.',
+  },
+  'https://research.google/pubs/dora-2025-state-of-ai-assisted-software-development-report/': {
+    kicker: 'research.google',
+    title: 'DORA 2025: AI-assisted Software Development',
+    desc: 'AI as an amplifier of existing organizational strengths and dysfunctions — value depends on the environment.',
+  },
+  'https://metr.org/Early_2025_AI_Experienced_OS_Devs_Study-paper.pdf': {
+    kicker: 'metr.org',
+    title: 'Early-2025 AI coding tools study',
+    desc: 'RCT: early-2025 AI tools increased task completion time by 19% for experienced developers in familiar repos.',
+  },
+};
+
 /**
  * Wire up the navigation bar and in-hero content panels.
  * @param {Document} doc
@@ -43,7 +67,7 @@ export function initNav(doc) {
   const dots = Array.from(doc.querySelectorAll('[data-panel-dot]'));
   const stage = doc.querySelector('[data-panel-stage]');
   const rail = doc.querySelector('.panel-rail');
-  const preview = doc.getElementById('founder-preview');
+  const preview = doc.getElementById('link-preview');
 
   const raf =
     typeof win.requestAnimationFrame === 'function'
@@ -305,35 +329,47 @@ export function initNav(doc) {
       },
       { passive: true },
     );
+
+    // At rail edges, continue the wheel into page scroll (hero → contact).
+    rail.addEventListener(
+      'wheel',
+      (e) => {
+        if (!rail) return;
+        const dy = e.deltaY;
+        if (!dy) return;
+        const atTop = rail.scrollTop <= SCROLL_BOTTOM_PX;
+        const atBottom =
+          rail.scrollTop + rail.clientHeight >= rail.scrollHeight - SCROLL_BOTTOM_PX;
+
+        const se = doc.scrollingElement || doc.documentElement;
+        const pageY = se.scrollTop || 0;
+        if (dy > 0 && atBottom) {
+          e.preventDefault();
+          se.scrollTop = pageY + dy;
+        } else if (dy < 0 && atTop && pageY > 0) {
+          e.preventDefault();
+          se.scrollTop = Math.max(0, pageY + dy);
+        }
+      },
+      { passive: false },
+    );
   }
 
-  // --- Founder jump links + hover preview ---------------------------------
+  // --- Link / founder hover previews --------------------------------------
   function hidePreview() {
     if (!preview) return;
     preview.hidden = true;
     preview.setAttribute('aria-hidden', 'true');
   }
 
-  function showPreview(key, anchor) {
-    const data = FOUNDERS[key];
-    if (!preview || !data || !anchor) return;
-    const img = preview.querySelector('.founder-preview-photo');
-    const name = preview.querySelector('.founder-preview-name');
-    const role = preview.querySelector('.founder-preview-role');
-    if (img) {
-      img.src = data.photo;
-      img.alt = `Portrait of ${data.name}`;
-    }
-    if (name) name.textContent = data.name;
-    if (role) role.textContent = data.role;
-
+  function placePreview(anchor) {
+    if (!preview || !anchor) return;
     preview.hidden = false;
     preview.setAttribute('aria-hidden', 'false');
-
     const rect = anchor.getBoundingClientRect();
     const pad = 12;
-    const pw = preview.offsetWidth || 280;
-    const ph = preview.offsetHeight || 80;
+    const pw = preview.offsetWidth || 320;
+    const ph = preview.offsetHeight || 96;
     let left = rect.left;
     let top = rect.bottom + 8;
     if (left + pw > win.innerWidth - pad) left = win.innerWidth - pw - pad;
@@ -342,6 +378,52 @@ export function initNav(doc) {
     if (top < pad) top = pad;
     preview.style.left = `${Math.round(left)}px`;
     preview.style.top = `${Math.round(top)}px`;
+  }
+
+  function showFounderPreview(key, anchor) {
+    const data = FOUNDERS[key];
+    if (!preview || !data || !anchor) return;
+    const img = preview.querySelector('.link-preview-photo');
+    const kicker = preview.querySelector('.link-preview-kicker');
+    const title = preview.querySelector('.link-preview-title');
+    const desc = preview.querySelector('.link-preview-desc');
+    if (img) {
+      img.hidden = false;
+      img.src = data.photo;
+      img.alt = `Portrait of ${data.name}`;
+    }
+    if (kicker) kicker.textContent = data.role;
+    if (title) title.textContent = data.name;
+    if (desc) desc.textContent = '';
+    placePreview(anchor);
+  }
+
+  function showLinkPreview(href, label, anchor) {
+    if (!preview || !anchor) return;
+    const meta =
+      LINK_PREVIEWS[href] ||
+      LINK_PREVIEWS[href.replace(/\/$/, '')] ||
+      LINK_PREVIEWS[`${href.replace(/\/$/, '')}/`] ||
+      null;
+    let host = '';
+    try {
+      host = new URL(href, win.location.href).hostname.replace(/^www\./, '');
+    } catch {
+      host = href;
+    }
+    const img = preview.querySelector('.link-preview-photo');
+    const kicker = preview.querySelector('.link-preview-kicker');
+    const title = preview.querySelector('.link-preview-title');
+    const desc = preview.querySelector('.link-preview-desc');
+    if (img) {
+      img.hidden = true;
+      img.removeAttribute('src');
+      img.alt = '';
+    }
+    if (kicker) kicker.textContent = meta ? meta.kicker : host;
+    if (title) title.textContent = meta ? meta.title : label || host;
+    if (desc) desc.textContent = meta ? meta.desc : '';
+    placePreview(anchor);
   }
 
   function scrollToFounder(key) {
@@ -383,9 +465,20 @@ export function initNav(doc) {
       hidePreview();
       scrollToFounder(key);
     });
-    link.addEventListener('mouseenter', () => showPreview(key, link));
+    link.addEventListener('mouseenter', () => showFounderPreview(key, link));
     link.addEventListener('mouseleave', hidePreview);
-    link.addEventListener('focus', () => showPreview(key, link));
+    link.addEventListener('focus', () => showFounderPreview(key, link));
+    link.addEventListener('blur', hidePreview);
+  });
+
+  // External citation links in panels get the same preview treatment.
+  doc.querySelectorAll('.panel a[href^="http"]').forEach((link) => {
+    if (link.classList.contains('founder-jump')) return;
+    const href = link.href;
+    const label = (link.textContent || '').trim();
+    link.addEventListener('mouseenter', () => showLinkPreview(href, label, link));
+    link.addEventListener('mouseleave', hidePreview);
+    link.addEventListener('focus', () => showLinkPreview(href, label, link));
     link.addEventListener('blur', hidePreview);
   });
 
@@ -462,13 +555,14 @@ export function initNav(doc) {
   function updateScrollChrome() {
     pending = false;
     header.setAttribute('data-scrolled', String(isScrolled(win.scrollY || 0)));
-    if (openId) return;
     const contact = doc.getElementById('contact');
     if (!contact) return;
     const r = contact.getBoundingClientRect();
     const vh = win.innerHeight || 0;
-    const onContact = r.top < vh * 0.45 && r.bottom > 80;
-    applyActive(onContact ? 'contact' : null);
+    const onContact = r.top < vh * 0.4 && r.bottom > 80;
+    if (onContact) applyActive('contact');
+    else if (openId) applyActive(openId);
+    else applyActive(null);
   }
 
   function schedule() {
