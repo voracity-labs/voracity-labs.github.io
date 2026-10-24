@@ -1,15 +1,14 @@
-// Navigation: mobile menu, scrolled style, active link, and focus on link clicks.
+// Navigation: mobile menu, in-hero panels (mission / projects / blog), contact scroll.
 
 import { navReducer, initialNavState, ariaExpanded } from './lib/nav-state.js';
-import { isScrolled, selectActiveSection } from './lib/active-section.js';
+import { isScrolled } from './lib/active-section.js';
 import { MOBILE_MAX } from './lib/sizing.js';
 
-const SECTION_IDS = ['research', 'systems', 'publications', 'about'];
+const PANEL_IDS = ['mission', 'projects', 'blog'];
 const DESKTOP_QUERY = `(min-width: ${MOBILE_MAX + 1}px)`;
 
 /**
- * Wire up the navigation bar. Safe to call with a document whose window lacks
- * matchMedia or requestAnimationFrame (falls back gracefully).
+ * Wire up the navigation bar and in-hero content panels.
  * @param {Document} doc
  */
 export function initNav(doc) {
@@ -20,29 +19,26 @@ export function initNav(doc) {
   if (!win || !header || !list) return;
 
   const links = Array.from(list.querySelectorAll('a[href^="#"]'));
-  const hero = doc.querySelector('.hero');
-  const sections = SECTION_IDS.map((id) => doc.getElementById(id)).filter(Boolean);
+  const panelLinks = Array.from(list.querySelectorAll('a[data-panel]'));
+  const panels = PANEL_IDS.map((id) => doc.getElementById(id)).filter(Boolean);
+  const panelById = new Map(panels.map((p) => [p.id, p]));
 
-  // Scheduling helpers: prefer rAF, fall back to setTimeout.
   const raf =
     typeof win.requestAnimationFrame === 'function'
       ? (cb) => win.requestAnimationFrame(cb)
       : (cb) => win.setTimeout(cb, 16);
 
-  // Breakpoint query (desktop when it matches). Missing matchMedia => fall
-  // back to the current viewport width.
   const mql = typeof win.matchMedia === 'function' ? win.matchMedia(DESKTOP_QUERY) : null;
   const isMobileNow = () =>
     mql ? !mql.matches : (win.innerWidth || 0) <= MOBILE_MAX;
 
-  // --- Progressive enhancement: JS-driven menu is now available ----------
   doc.documentElement.classList.add('js-nav');
   if (toggle) toggle.removeAttribute('hidden');
 
-  // --- Menu state ---------------------------------------------------------
+  // --- Mobile menu --------------------------------------------------------
   let state = initialNavState(isMobileNow());
 
-  function render() {
+  function renderMenu() {
     if (toggle) toggle.setAttribute('aria-expanded', ariaExpanded(state));
     list.setAttribute('data-open', String(state.open));
     if (state.focusToggle && toggle) toggle.focus();
@@ -50,116 +46,187 @@ export function initNav(doc) {
 
   function dispatch(event) {
     state = navReducer(state, event);
-    render();
+    renderMenu();
   }
 
-  render();
+  renderMenu();
 
   if (toggle) {
     toggle.addEventListener('click', () => dispatch({ type: 'TOGGLE' }));
   }
 
-  doc.addEventListener('keydown', (e) => {
-    if ((e.key === 'Escape' || e.key === 'Esc') && state.open) {
-      dispatch({ type: 'ESCAPE' });
-    }
-  });
-
-  // --- Focus the target section after the default fragment scroll -----------
-  function focusTargetLater(href) {
-    const id = href && href.charAt(0) === '#' ? href.slice(1) : '';
-    if (!id) return;
-    const target = doc.getElementById(id);
-    if (!target) return;
-    // Let the browser perform the hash navigation first (no preventDefault).
-    raf(() => {
-      try {
-        target.focus({ preventScroll: true });
-      } catch {
-        target.focus();
-      }
-    });
-  }
-
-  links.forEach((link) => {
-    link.addEventListener('click', () => {
-      if (state.isMobile) dispatch({ type: 'LINK_ACTIVATED' });
-      focusTargetLater(link.getAttribute('href'));
-    });
-  });
-
-  doc.querySelectorAll('.cta').forEach((cta) => {
-    cta.addEventListener('click', () => focusTargetLater(cta.getAttribute('href')));
-  });
-
-  // --- Scrolled state + active link (rAF-throttled) ------------------------
-  let activeId = null;
-  let pending = false;
+  // --- Panels -------------------------------------------------------------
+  let openId = null;
 
   function applyActive(id) {
-    activeId = id;
     links.forEach((link) => {
-      const isActive = id !== null && link.getAttribute('href') === `#${id}`;
+      const href = link.getAttribute('href');
+      const isActive = id !== null && href === `#${id}`;
       link.classList.toggle('is-active', isActive);
       if (isActive) link.setAttribute('aria-current', 'true');
       else link.removeAttribute('aria-current');
     });
   }
 
-  function update() {
+  function closePanel({ updateUrl = true, focusToggle = false } = {}) {
+    if (!openId) {
+      applyActive(null);
+      return;
+    }
+    const panel = panelById.get(openId);
+    if (panel) {
+      panel.classList.remove('is-open');
+      panel.setAttribute('aria-hidden', 'true');
+    }
+    openId = null;
+    doc.documentElement.classList.remove('panel-open');
+    applyActive(null);
+    if (updateUrl && win.history && typeof win.history.replaceState === 'function') {
+      win.history.replaceState(null, '', `${win.location.pathname}${win.location.search}`);
+    }
+    if (focusToggle && toggle) toggle.focus();
+  }
+
+  function openPanel(id, { updateUrl = true } = {}) {
+    const panel = panelById.get(id);
+    if (!panel) return;
+
+    panels.forEach((p) => {
+      const on = p.id === id;
+      p.classList.toggle('is-open', on);
+      p.setAttribute('aria-hidden', on ? 'false' : 'true');
+    });
+
+    openId = id;
+    doc.documentElement.classList.add('panel-open');
+    applyActive(id);
+
+    if (updateUrl && win.history && typeof win.history.replaceState === 'function') {
+      win.history.replaceState(null, '', `#${id}`);
+    }
+
+    raf(() => {
+      try {
+        panel.focus({ preventScroll: true });
+      } catch {
+        panel.focus();
+      }
+    });
+  }
+
+  function togglePanel(id) {
+    if (openId === id) closePanel();
+    else openPanel(id);
+  }
+
+  // Initial hash: open matching panel without scrolling the page.
+  const initialHash = (win.location.hash || '').slice(1);
+  if (PANEL_IDS.includes(initialHash)) {
+    openPanel(initialHash, { updateUrl: false });
+  } else {
+    panels.forEach((p) => {
+      p.setAttribute('aria-hidden', 'true');
+      p.classList.remove('is-open');
+    });
+  }
+
+  panelLinks.forEach((link) => {
+    link.addEventListener('click', (e) => {
+      const href = link.getAttribute('href') || '';
+      const id = href.charAt(0) === '#' ? href.slice(1) : '';
+      if (!PANEL_IDS.includes(id)) return;
+      e.preventDefault();
+      if (state.isMobile) dispatch({ type: 'LINK_ACTIVATED' });
+      togglePanel(id);
+    });
+  });
+
+  // Contact: close any panel, then allow normal hash scroll.
+  const contactLink = list.querySelector('a[href="#contact"]');
+  if (contactLink) {
+    contactLink.addEventListener('click', () => {
+      closePanel({ updateUrl: false });
+      if (state.isMobile) dispatch({ type: 'LINK_ACTIVATED' });
+      applyActive('contact');
+      raf(() => {
+        const target = doc.getElementById('contact');
+        if (!target) return;
+        try {
+          target.focus({ preventScroll: true });
+        } catch {
+          target.focus();
+        }
+      });
+    });
+  }
+
+  doc.querySelectorAll('[data-close-panel]').forEach((el) => {
+    el.addEventListener('click', (e) => {
+      if (!openId) return;
+      e.preventDefault();
+      closePanel();
+      if (win.history && typeof win.history.replaceState === 'function') {
+        win.history.replaceState(null, '', `${win.location.pathname}${win.location.search}`);
+      }
+    });
+  });
+
+  doc.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' || e.key === 'Esc') {
+      if (state.open) dispatch({ type: 'ESCAPE' });
+      else if (openId) closePanel({ focusToggle: false });
+    }
+  });
+
+  win.addEventListener('hashchange', () => {
+    const id = (win.location.hash || '').slice(1);
+    if (PANEL_IDS.includes(id)) openPanel(id, { updateUrl: false });
+    else if (id === 'contact') {
+      closePanel({ updateUrl: false });
+      applyActive('contact');
+    } else if (!id || id === 'top') {
+      closePanel({ updateUrl: false });
+    }
+  });
+
+  // --- Scrolled chrome (contact section / footer) -------------------------
+  let pending = false;
+
+  function updateScrollChrome() {
     pending = false;
     header.setAttribute('data-scrolled', String(isScrolled(win.scrollY || 0)));
+    if (openId) return;
+    const contact = doc.getElementById('contact');
+    if (!contact) return;
+    const r = contact.getBoundingClientRect();
+    const vh = win.innerHeight || 0;
+    const onContact = r.top < vh * 0.45 && r.bottom > varNavInset();
+    applyActive(onContact ? 'contact' : null);
+  }
 
-    const rects = [];
-    if (hero) {
-      const r = hero.getBoundingClientRect();
-      rects.push({ id: null, top: r.top, bottom: r.bottom });
-    }
-    sections.forEach((s) => {
-      const r = s.getBoundingClientRect();
-      rects.push({ id: s.id, top: r.top, bottom: r.bottom });
-    });
-    // Rects are viewport-relative, so the viewport spans [0, innerHeight].
-    const next = selectActiveSection(rects, 0, win.innerHeight || 0);
-    if (next !== activeId) applyActive(next);
+  function varNavInset() {
+    return 80;
   }
 
   function schedule() {
     if (pending) return;
     pending = true;
-    raf(update);
+    raf(updateScrollChrome);
   }
 
   win.addEventListener('scroll', schedule, { passive: true });
   win.addEventListener('resize', schedule, { passive: true });
-  update();
+  updateScrollChrome();
 
-  // --- Breakpoint crossing (menu reset + keep current section) -------------
+  // --- Breakpoint ---------------------------------------------------------
   function onBreakpoint() {
-    // activeId reflects the last frame before the layout switch.
-    const keepId = activeId;
     dispatch({ type: 'BREAKPOINT', isMobile: isMobileNow() });
-    if (!keepId) return;
-    raf(() => {
-      const el = doc.getElementById(keepId);
-      if (!el) return;
-      const top = el.getBoundingClientRect().top;
-      const vh = win.innerHeight || 0;
-      if (top < 0 || top >= vh) {
-        el.scrollIntoView({ block: 'start', behavior: 'instant' });
-      }
-      schedule();
-    });
   }
 
   if (mql) {
-    if (typeof mql.addEventListener === 'function') {
-      mql.addEventListener('change', onBreakpoint);
-    } else if (typeof mql.addListener === 'function') {
-      mql.addListener(onBreakpoint);
-    }
+    if (typeof mql.addEventListener === 'function') mql.addEventListener('change', onBreakpoint);
+    else if (typeof mql.addListener === 'function') mql.addListener(onBreakpoint);
   } else {
-    // No matchMedia: detect crossings on resize.
     let lastMobile = state.isMobile;
     win.addEventListener('resize', () => {
       const m = isMobileNow();

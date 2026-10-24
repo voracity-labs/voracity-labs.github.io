@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Voracity Labs</title>
-  <meta name="description" content="Voracity Labs — at a profit if we can; at a loss if we must. Research, systems, and practical AI.">
+  <meta name="description" content="Voracity Labs">
   <meta property="og:title" content="Voracity Labs">
   <meta property="og:description" content="At a profit if we can; at a loss if we must.">
   <meta property="og:url" content="https://voracitylabs.com/">
@@ -41,7 +41,7 @@
 
   <header class="site-header" data-scrolled="false">
     <div class="brand">
-      <a class="wordmark" href="#top" aria-label="Voracity Labs">
+      <a class="wordmark" href="#top" aria-label="Voracity Labs" data-close-panel>
         <svg class="wordmark-logo" width="1236" height="112" viewBox="-6 -6 1236 112" aria-hidden="true" focusable="false"><use href="#vl-logo"/></svg>
       </a>
       <p class="brand-tagline">at a profit if we can; at a loss if we must</p>
@@ -49,10 +49,10 @@
     <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="nav-links" hidden>Menu</button>
     <nav aria-label="Primary">
       <ul id="nav-links">
-        <li><a href="#research">research</a></li>
-        <li><a href="#systems">systems</a></li>
-        <li><a href="#publications">publications</a></li>
-        <li><a href="#about">about</a></li>
+        <li><a href="#mission" data-panel>mission</a></li>
+        <li><a href="#projects" data-panel>projects</a></li>
+        <li><a href="#blog" data-panel>blog</a></li>
+        <li><a href="#contact">contact</a></li>
       </ul>
     </nav>
   </header>
@@ -61,33 +61,35 @@
     <section id="top" class="hero" aria-label="Voracity Labs">
       <canvas class="hero-canvas" aria-hidden="true" tabindex="-1"></canvas>
       <h1 class="visually-hidden">Voracity Labs</h1>
-    </section>
 
-    <section id="research" tabindex="-1" aria-labelledby="research-h">
-      <div class="container">
-        <h2 id="research-h" data-reveal>Research</h2>
-        <p data-reveal>We study the structures that make learning systems reliable: geometry of latent spaces, spectral methods, and the invariants that survive noise. Theory only matters here when it changes what we can build.</p>
+      <div class="panel-stage" data-panel-stage>
+        <article id="mission" class="panel" tabindex="-1" aria-labelledby="mission-h" aria-hidden="true">
+          <div class="panel-inner">
+            <h2 id="mission-h">Mission</h2>
+            <p>Voracity Labs solves practical problems with AI. We skip the hype and start with the work: the slow, repetitive, error-prone tasks that cost teams time. Then we build focused tools that make that work faster, cheaper, and more reliable.</p>
+          </div>
+        </article>
+
+        <article id="projects" class="panel" tabindex="-1" aria-labelledby="projects-h" aria-hidden="true">
+          <div class="panel-inner">
+            <h2 id="projects-h">Projects</h2>
+            <p>Focused tools for real workflows. We sit with the work, pick the narrowest model that helps, ship it to users, and measure whether time, cost, or accuracy actually moved.</p>
+          </div>
+        </article>
+
+        <article id="blog" class="panel" tabindex="-1" aria-labelledby="blog-h" aria-hidden="true">
+          <div class="panel-inner">
+            <h2 id="blog-h">Blog</h2>
+            <p>Notes and write-ups appear here as they ship. Prefer working systems over slide decks; prefer measured results over claims.</p>
+          </div>
+        </article>
       </div>
     </section>
 
-    <section id="systems" tabindex="-1" aria-labelledby="systems-h">
+    <section id="contact" tabindex="-1" aria-labelledby="contact-h">
       <div class="container">
-        <h2 id="systems-h" data-reveal>Systems</h2>
-        <p data-reveal>Focused tools for real workflows. We sit with the work, pick the narrowest model that helps, ship it to users, and measure whether time, cost, or accuracy actually moved.</p>
-      </div>
-    </section>
-
-    <section id="publications" tabindex="-1" aria-labelledby="publications-h">
-      <div class="container">
-        <h2 id="publications-h" data-reveal>Publications</h2>
-        <p data-reveal>Notes and write-ups appear here as they ship. Prefer working systems over slide decks; prefer measured results over claims.</p>
-      </div>
-    </section>
-
-    <section id="about" tabindex="-1" aria-labelledby="about-h">
-      <div class="container">
-        <h2 id="about-h" data-reveal>About</h2>
-        <p data-reveal>Voracity Labs solves practical problems with AI. We skip the hype and start with the work: the slow, repetitive, error-prone tasks that cost teams time. Then we build focused tools that make that work faster, cheaper, and more reliable.</p>
+        <h2 id="contact-h">Contact</h2>
+        <p>Start a conversation when you have a real problem worth solving.</p>
       </div>
     </section>
   </main>
