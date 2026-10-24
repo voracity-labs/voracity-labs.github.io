@@ -43,7 +43,7 @@ export const LENS_FALL_MS = 600;
 /** Largest simulated frame duration, ms. */
 export const MAX_DT_MS = 50;
 /** Nodes closer than this are linked (renderer uses the same value). */
-export const LINK_DISTANCE = 120;
+export const LINK_DISTANCE = 135;
 
 const FLOW_SPEED = 0.008;      // px / ms, analytic flow field amplitude
 const FLOW_FREQ = 0.0035;      // spatial frequency, 1 / px

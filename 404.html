@@ -5,16 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Page not found | Voracity Labs</title>
   <meta name="robots" content="noindex">
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M6 7 L16 25 L26 7' fill='none' stroke='%237CF7C5' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='16' cy='25' r='3' fill='%237CF7C5'/%3E%3C/svg%3E">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;600&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #07090F;
-      --surface: #0E121B;
-      --text: #E8ECF4;
-      --text-muted: #C9D1DE;
-      --accent: #7CF7C5;
-      --accent-2: #8B7CFF;
-      color-scheme: dark;
+      --bg: #f7f7f5;
+      --bg-grid: #e4e4e0;
+      --text: #111111;
+      --text-muted: #6b6b6b;
+      color-scheme: light;
     }
     *, *::before, *::after { box-sizing: border-box; }
     html, body { margin: 0; }
@@ -23,18 +24,23 @@
       display: grid;
       place-items: center;
       padding: 1.5rem;
-      background: var(--bg);
+      background-color: var(--bg);
+      background-image:
+        linear-gradient(var(--bg-grid) 1px, transparent 1px),
+        linear-gradient(90deg, var(--bg-grid) 1px, transparent 1px);
+      background-size: 28px 28px;
       color: var(--text);
-      font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      font-family: "IBM Plex Sans", "Segoe UI", sans-serif;
       font-size: 1rem;
       line-height: 1.6;
     }
     main { max-inline-size: 36rem; text-align: center; }
     h1 {
       margin: 0 0 0.75rem;
-      font-size: clamp(2rem, 6vw, 3rem);
+      font-size: clamp(1.75rem, 5vw, 2.5rem);
       line-height: 1.15;
       letter-spacing: -0.02em;
+      font-weight: 600;
     }
     p { margin: 0 0 2rem; color: var(--text-muted); }
     a {
@@ -44,15 +50,16 @@
       min-block-size: 44px;
       min-inline-size: 44px;
       padding: 0.625rem 1.25rem;
-      border-radius: 999px;
-      background: var(--accent);
+      border: 1px solid var(--text);
+      border-radius: 4px;
+      background: var(--text);
       color: var(--bg);
       font-weight: 600;
       text-decoration: none;
     }
     a:hover { text-decoration: underline; }
     a:focus-visible {
-      outline: 2px solid var(--accent);
+      outline: 2px solid var(--text);
       outline-offset: 2px;
     }
   </style>
