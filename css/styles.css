@@ -385,6 +385,8 @@ section[tabindex="-1"]:focus {
 .hero {
   position: relative;
   isolation: isolate;
+  display: flex;
+  flex-direction: column;
   min-height: 100vh;
   min-height: 100svh;
   padding-block: var(--nav-h) 0;
@@ -409,36 +411,37 @@ html.hero-fallback .hero-canvas {
   display: none;
 }
 
-/* Panels sit under the header, inside the hero — gravity field stays visible. */
-.panel-stage {
-  position: absolute;
-  inset: var(--nav-h) var(--gutter) 0;
+/* Open copy sits in the field with no card chrome — text only. */
+.panel-rail {
+  position: relative;
   z-index: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  padding-block: clamp(12px, 3vh, 32px) clamp(24px, 5vh, 48px);
+  flex: 1 1 auto;
+  width: 100%;
+  max-width: var(--max-w);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+  padding-block: clamp(20px, 4vh, 40px) 12px;
+  overflow: auto;
   pointer-events: none;
 }
 
 .panel {
   position: absolute;
-  top: clamp(12px, 3vh, 32px);
-  left: 0;
-  width: min(100%, 36rem);
-  max-height: calc(100% - clamp(12px, 3vh, 32px) - clamp(24px, 5vh, 48px) - 3rem);
-  overflow: auto;
+  top: clamp(20px, 4vh, 40px);
+  left: var(--gutter);
+  width: min(100% - (2 * var(--gutter)), 38rem);
+  max-width: 38rem;
   pointer-events: none;
   opacity: 0;
   visibility: hidden;
-  transform: translateY(10px);
+  transform: translateY(8px);
 }
 
 .panel.is-open,
 .panel:target {
   position: relative;
   top: auto;
-  max-height: calc(100svh - var(--nav-h) - 6rem);
+  left: auto;
   opacity: 1;
   visibility: visible;
   transform: none;
@@ -447,45 +450,60 @@ html.hero-fallback .hero-canvas {
 
 /* With JS, :target alone must not fight the controlled open state. */
 html.js-nav .panel:target:not(.is-open) {
+  position: absolute;
   opacity: 0;
   visibility: hidden;
-  transform: translateY(10px);
+  transform: translateY(8px);
   pointer-events: none;
-}
-
-.panel-inner {
-  padding: clamp(20px, 3vw, 32px);
-  border: 1px solid var(--rule);
-  background: rgba(247, 247, 245, 0.88);
-  -webkit-backdrop-filter: blur(10px);
-  backdrop-filter: blur(10px);
 }
 
 .panel h2 {
   font-family: var(--font-mono);
-  font-size: clamp(1.25rem, 1.1rem + 0.6vw, 1.5rem);
+  font-size: clamp(1.35rem, 1.15rem + 0.7vw, 1.75rem);
   font-weight: 500;
   letter-spacing: -0.01em;
   text-transform: lowercase;
 }
 
-.panel h2 + p {
-  margin-top: clamp(12px, 2vw, 20px);
+.panel-lead {
+  margin-top: clamp(10px, 1.5vw, 16px);
+  color: var(--text);
+  font-size: clamp(1.05rem, 1rem + 0.3vw, 1.2rem);
+  font-weight: 500;
+  line-height: 1.55;
+}
+
+.panel h3 {
+  margin-top: clamp(22px, 3.5vw, 32px);
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: lowercase;
+  color: var(--text);
+}
+
+.panel h3 + p {
+  margin-top: 8px;
 }
 
 .panel p {
-  color: var(--text-muted);
-  font-size: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+  color: #4a4a4a;
+  font-size: clamp(0.9375rem, 0.9rem + 0.2vw, 1.0625rem);
   line-height: 1.65;
 }
 
-/* Segmented progress under the open panel: fills over the dwell time. */
+/* Cycle indicator: pinned to the bottom of the hero, before contact. */
 .panel-indicator {
   position: relative;
+  z-index: 1;
+  flex: 0 0 auto;
   display: flex;
-  gap: 6px;
-  width: min(100%, 36rem);
-  margin-top: 14px;
+  gap: 8px;
+  width: min(100% - (2 * var(--gutter)), 22rem);
+  max-width: 22rem;
+  margin-inline: max(var(--gutter), calc((100% - var(--max-w)) / 2 + var(--gutter)));
+  margin-bottom: clamp(16px, 3vh, 28px);
   pointer-events: auto;
 }
 
@@ -506,7 +524,7 @@ html.js-nav .panel:target:not(.is-open) {
   height: 2px;
   margin-top: calc((var(--target) - 2px) / 2);
   overflow: hidden;
-  background: rgba(17, 17, 17, 0.16);
+  background: rgba(17, 17, 17, 0.18);
 }
 
 .panel-indicator-fill {
@@ -526,9 +544,9 @@ html.js-nav .panel:target:not(.is-open) {
   transform: scaleX(1);
 }
 
-.panel-stage.is-rotating .panel-indicator-item.is-active .panel-indicator-fill {
+.hero.is-rotating .panel-indicator-item.is-active .panel-indicator-fill {
   transform: scaleX(0);
-  animation: panel-indicator-fill var(--panel-rotate-ms, 5000ms) linear forwards;
+  animation: panel-indicator-fill var(--panel-rotate-ms, 8000ms) linear forwards;
 }
 
 .panel-indicator-item:not(.is-active):not(.is-done) .panel-indicator-fill {
@@ -543,22 +561,22 @@ html.js-nav .panel:target:not(.is-open) {
 @media (prefers-reduced-motion: no-preference) {
   .panel {
     transition:
-      opacity 220ms ease,
-      transform 280ms cubic-bezier(0.2, 0.7, 0.2, 1),
-      visibility 0s linear 220ms;
+      opacity 240ms ease,
+      transform 300ms cubic-bezier(0.2, 0.7, 0.2, 1),
+      visibility 0s linear 240ms;
   }
 
   .panel.is-open,
   .panel:target {
     transition:
-      opacity 220ms ease,
-      transform 280ms cubic-bezier(0.2, 0.7, 0.2, 1),
+      opacity 240ms ease,
+      transform 300ms cubic-bezier(0.2, 0.7, 0.2, 1),
       visibility 0s;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .panel-stage.is-rotating .panel-indicator-item.is-active .panel-indicator-fill {
+  .hero.is-rotating .panel-indicator-item.is-active .panel-indicator-fill {
     animation: none;
     transform: scaleX(1);
   }

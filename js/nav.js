@@ -5,7 +5,7 @@ import { isScrolled } from './lib/active-section.js';
 import { MOBILE_MAX } from './lib/sizing.js';
 
 const PANEL_IDS = ['mission', 'projects', 'blog'];
-const ROTATE_MS = 5000;
+const ROTATE_MS = 8000;
 const DESKTOP_QUERY = `(min-width: ${MOBILE_MAX + 1}px)`;
 const REDUCE_QUERY = '(prefers-reduced-motion: reduce)';
 

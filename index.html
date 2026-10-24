@@ -58,46 +58,67 @@
   </header>
 
   <main id="main" tabindex="-1">
-    <section id="top" class="hero" aria-label="Voracity Labs">
+    <section id="top" class="hero" aria-label="Voracity Labs" data-panel-stage>
       <canvas class="hero-canvas" aria-hidden="true" tabindex="-1"></canvas>
       <h1 class="visually-hidden">Voracity Labs</h1>
 
-      <div class="panel-stage" data-panel-stage>
+      <div class="panel-rail">
         <article id="mission" class="panel" tabindex="-1" aria-labelledby="mission-h" aria-hidden="true">
-          <div class="panel-inner">
-            <h2 id="mission-h">Mission</h2>
-            <p>Voracity Labs solves practical problems with AI. We skip the hype and start with the work: the slow, repetitive, error-prone tasks that cost teams time. Then we build focused tools that make that work faster, cheaper, and more reliable.</p>
-          </div>
+          <h2 id="mission-h">Mission</h2>
+          <p class="panel-lead">We build AI that earns its place in real work — measured by time returned, errors avoided, and decisions made sharper.</p>
+
+          <h3>Start with the work</h3>
+          <p>Most “AI initiatives” begin with a model. We begin with a workflow: where hours disappear, where handoffs break, where accuracy quietly costs money. If we cannot name the bottleneck, we do not ship software at it.</p>
+
+          <h3>Narrow by design</h3>
+          <p>Broad assistants look impressive in demos and fail in operations. We design for one job at a time — the smallest system that moves a metric — then expand only where evidence says expand.</p>
+
+          <h3>Ship, measure, iterate</h3>
+          <p>Tools go in front of real users quickly. We track clear outcomes (cycle time, cost per case, precision/recall where it matters) and refine from those numbers, not from vibes or slide decks.</p>
         </article>
 
         <article id="projects" class="panel" tabindex="-1" aria-labelledby="projects-h" aria-hidden="true">
-          <div class="panel-inner">
-            <h2 id="projects-h">Projects</h2>
-            <p>Focused tools for real workflows. We sit with the work, pick the narrowest model that helps, ship it to users, and measure whether time, cost, or accuracy actually moved.</p>
-          </div>
+          <h2 id="projects-h">Projects</h2>
+          <p class="panel-lead">Focused systems we put into production — each one owned end-to-end from problem framing through measurement.</p>
+
+          <h3>Operations automation</h3>
+          <p>Repetitive back-office steps — intake, classification, extraction, routing — handed to dependable models that sit beside your team and escalate when confidence drops.</p>
+
+          <h3>Decision support</h3>
+          <p>Surfacing the right numbers, risks, and recommendations at the moment a call has to be made. Not another dashboard; a thin layer on the decision itself.</p>
+
+          <h3>Customer workflows</h3>
+          <p>Support, onboarding, and follow-up sped up with assistants that answer accurately, keep context, and hand off to humans without friction.</p>
         </article>
 
         <article id="blog" class="panel" tabindex="-1" aria-labelledby="blog-h" aria-hidden="true">
-          <div class="panel-inner">
-            <h2 id="blog-h">Blog</h2>
-            <p>Notes and write-ups appear here as they ship. Prefer working systems over slide decks; prefer measured results over claims.</p>
-          </div>
-        </article>
+          <h2 id="blog-h">Blog</h2>
+          <p class="panel-lead">Working notes as they ship. We write when something is proven in practice — or when a failure taught us something worth keeping.</p>
 
-        <div class="panel-indicator" role="tablist" aria-label="Mission, projects, and blog">
-          <button type="button" class="panel-indicator-item" role="tab" aria-controls="mission" aria-selected="false" data-panel-dot="mission">
-            <span class="visually-hidden">Mission</span>
-            <span class="panel-indicator-track" aria-hidden="true"><span class="panel-indicator-fill"></span></span>
-          </button>
-          <button type="button" class="panel-indicator-item" role="tab" aria-controls="projects" aria-selected="false" data-panel-dot="projects">
-            <span class="visually-hidden">Projects</span>
-            <span class="panel-indicator-track" aria-hidden="true"><span class="panel-indicator-fill"></span></span>
-          </button>
-          <button type="button" class="panel-indicator-item" role="tab" aria-controls="blog" aria-selected="false" data-panel-dot="blog">
-            <span class="visually-hidden">Blog</span>
-            <span class="panel-indicator-track" aria-hidden="true"><span class="panel-indicator-fill"></span></span>
-          </button>
-        </div>
+          <h3>Field notes</h3>
+          <p>Short posts from live systems: what broke, what held, which metric actually moved. Prefer reproducibility over rhetoric.</p>
+
+          <h3>Methods</h3>
+          <p>How we evaluate models on real distributions, when classical pipelines beat deep ones, and how we keep latency and cost honest.</p>
+
+          <h3>Open questions</h3>
+          <p>Problems we are still chewing on — geometry of latent spaces, calibration under shift, and tooling that makes iteration cheaper than debate.</p>
+        </article>
+      </div>
+
+      <div class="panel-indicator" role="tablist" aria-label="Mission, projects, and blog">
+        <button type="button" class="panel-indicator-item" role="tab" aria-controls="mission" aria-selected="false" data-panel-dot="mission">
+          <span class="visually-hidden">Mission</span>
+          <span class="panel-indicator-track" aria-hidden="true"><span class="panel-indicator-fill"></span></span>
+        </button>
+        <button type="button" class="panel-indicator-item" role="tab" aria-controls="projects" aria-selected="false" data-panel-dot="projects">
+          <span class="visually-hidden">Projects</span>
+          <span class="panel-indicator-track" aria-hidden="true"><span class="panel-indicator-fill"></span></span>
+        </button>
+        <button type="button" class="panel-indicator-item" role="tab" aria-controls="blog" aria-selected="false" data-panel-dot="blog">
+          <span class="visually-hidden">Blog</span>
+          <span class="panel-indicator-track" aria-hidden="true"><span class="panel-indicator-fill"></span></span>
+        </button>
       </div>
     </section>
 
