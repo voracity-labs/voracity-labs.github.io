@@ -6,8 +6,24 @@ import { MOBILE_MAX } from './lib/sizing.js';
 
 const PANEL_IDS = ['mission', 'projects', 'blog'];
 const ROTATE_MS = 14000;
+const SCROLL_BOTTOM_PX = 12;
 const DESKTOP_QUERY = `(min-width: ${MOBILE_MAX + 1}px)`;
 const REDUCE_QUERY = '(prefers-reduced-motion: reduce)';
+
+const FOUNDERS = {
+  mark: {
+    id: 'founder-mark',
+    name: 'Mark Mu',
+    role: 'Co-founder',
+    photo: 'assets/mark-mu.svg',
+  },
+  gabriel: {
+    id: 'founder-gabriel',
+    name: 'Gabriel You',
+    role: 'Co-founder',
+    photo: 'assets/gabriel-you.svg',
+  },
+};
 
 /**
  * Wire up the navigation bar and in-hero content panels.
@@ -26,6 +42,8 @@ export function initNav(doc) {
   const panelById = new Map(panels.map((p) => [p.id, p]));
   const dots = Array.from(doc.querySelectorAll('[data-panel-dot]'));
   const stage = doc.querySelector('[data-panel-stage]');
+  const rail = doc.querySelector('.panel-rail');
+  const preview = doc.getElementById('founder-preview');
 
   const raf =
     typeof win.requestAnimationFrame === 'function'
@@ -62,10 +80,11 @@ export function initNav(doc) {
     toggle.addEventListener('click', () => dispatch({ type: 'TOGGLE' }));
   }
 
-  // --- Panels + rotation -----------------------------------------------------
+  // --- Panels + rotate -----------------------------------------------------
   let openId = null;
   let rotateTimer = null;
   let rotating = false;
+  let rotateHold = false; // true while mission is unread (not scrolled to bottom)
 
   function applyActive(id) {
     links.forEach((link) => {
@@ -79,6 +98,7 @@ export function initNav(doc) {
 
   function syncIndicator(id) {
     const activeIndex = PANEL_IDS.indexOf(id);
+    const showFill = rotating && !rotateHold && !prefersReducedMotion();
     dots.forEach((dot) => {
       const key = dot.getAttribute('data-panel-dot');
       const index = PANEL_IDS.indexOf(key);
@@ -87,24 +107,23 @@ export function initNav(doc) {
       dot.classList.toggle('is-active', on);
       dot.classList.toggle('is-done', done);
       dot.setAttribute('aria-selected', on ? 'true' : 'false');
-      // Restart fill animation on the active track.
-      if (on && rotating && !prefersReducedMotion()) {
+      if (on && showFill) {
         const fill = dot.querySelector('.panel-indicator-fill');
         if (fill) {
           fill.style.animation = 'none';
-          // Force reflow so the animation restarts cleanly.
           void fill.offsetWidth;
           fill.style.animation = '';
         }
       }
     });
     if (stage) {
-      stage.classList.toggle('is-rotating', rotating && !!id && !prefersReducedMotion());
+      stage.classList.toggle('is-rotating', showFill && !!id);
     }
   }
 
   function stopRotate() {
     rotating = false;
+    rotateHold = false;
     if (rotateTimer !== null) {
       win.clearTimeout(rotateTimer);
       rotateTimer = null;
@@ -112,16 +131,26 @@ export function initNav(doc) {
     if (stage) stage.classList.remove('is-rotating');
   }
 
+  function clearRotateTimer() {
+    if (rotateTimer !== null) {
+      win.clearTimeout(rotateTimer);
+      rotateTimer = null;
+    }
+  }
+
   function scheduleRotate() {
-    if (rotateTimer !== null) win.clearTimeout(rotateTimer);
-    rotateTimer = null;
-    if (!rotating || prefersReducedMotion() || !openId) return;
+    clearRotateTimer();
+    if (!rotating || rotateHold || prefersReducedMotion() || !openId) {
+      syncIndicator(openId);
+      return;
+    }
     rotateTimer = win.setTimeout(() => {
       rotateTimer = null;
       const i = PANEL_IDS.indexOf(openId);
       const next = PANEL_IDS[(i + 1) % PANEL_IDS.length];
       openPanel(next, { updateUrl: false, focus: false, restartRotate: true });
     }, ROTATE_MS);
+    syncIndicator(openId);
   }
 
   function startRotate() {
@@ -131,12 +160,39 @@ export function initNav(doc) {
       return;
     }
     rotating = true;
+    evaluateMissionHold();
     scheduleRotate();
-    syncIndicator(openId);
+  }
+
+  function railAtBottom() {
+    if (!rail) return true;
+    const remaining = rail.scrollHeight - rail.clientHeight - rail.scrollTop;
+    // No overflow, or within a few px of the end.
+    return remaining <= SCROLL_BOTTOM_PX;
+  }
+
+  /** Hold the carousel while mission content is still unread. */
+  function evaluateMissionHold() {
+    if (openId !== 'mission') {
+      rotateHold = false;
+      return;
+    }
+    if (!rail) {
+      rotateHold = false;
+      return;
+    }
+    // If it fits, no hold. If it overflows, hold until the reader reaches the bottom.
+    const overflows = rail.scrollHeight > rail.clientHeight + SCROLL_BOTTOM_PX;
+    rotateHold = overflows && !railAtBottom();
+  }
+
+  function resetRailScroll() {
+    if (rail) rail.scrollTop = 0;
   }
 
   function closePanel({ updateUrl = true, focusToggle = false } = {}) {
     stopRotate();
+    hidePreview();
     if (!openId) {
       applyActive(null);
       syncIndicator(null);
@@ -151,6 +207,7 @@ export function initNav(doc) {
     doc.documentElement.classList.remove('panel-open');
     applyActive(null);
     syncIndicator(null);
+    resetRailScroll();
     if (updateUrl && win.history && typeof win.history.replaceState === 'function') {
       win.history.replaceState(null, '', `${win.location.pathname}${win.location.search}`);
     }
@@ -161,6 +218,8 @@ export function initNav(doc) {
     const panel = panelById.get(id);
     if (!panel) return;
 
+    hidePreview();
+
     panels.forEach((p) => {
       const on = p.id === id;
       p.classList.toggle('is-open', on);
@@ -170,13 +229,17 @@ export function initNav(doc) {
     openId = id;
     doc.documentElement.classList.add('panel-open');
     applyActive(id);
+    resetRailScroll();
 
     if (updateUrl && win.history && typeof win.history.replaceState === 'function') {
       win.history.replaceState(null, '', `#${id}`);
     }
 
     if (restartRotate || rotating) startRotate();
-    else syncIndicator(id);
+    else {
+      evaluateMissionHold();
+      syncIndicator(id);
+    }
 
     if (focus) {
       raf(() => {
@@ -195,6 +258,9 @@ export function initNav(doc) {
     openPanel(initialHash, { updateUrl: false, focus: false, restartRotate: true });
   } else if (initialHash === 'contact') {
     syncIndicator(null);
+  } else if (initialHash === 'founder-mark' || initialHash === 'founder-gabriel') {
+    openPanel('mission', { updateUrl: false, focus: false, restartRotate: true });
+    raf(() => scrollToFounder(initialHash === 'founder-mark' ? 'mark' : 'gabriel'));
   } else {
     openPanel('mission', { updateUrl: false, focus: false, restartRotate: true });
   }
@@ -206,7 +272,6 @@ export function initNav(doc) {
       if (!PANEL_IDS.includes(id)) return;
       e.preventDefault();
       if (state.isMobile) dispatch({ type: 'LINK_ACTIVATED' });
-      // Manual pick: jump to panel and keep the carousel going from there.
       openPanel(id, { updateUrl: true, focus: true, restartRotate: true });
     });
   });
@@ -217,6 +282,111 @@ export function initNav(doc) {
       if (!PANEL_IDS.includes(id)) return;
       openPanel(id, { updateUrl: true, focus: true, restartRotate: true });
     });
+  });
+
+  // Mission rail scroll: hold rotate until the bottom is reached.
+  if (rail) {
+    rail.addEventListener(
+      'scroll',
+      () => {
+        if (openId !== 'mission' || !rotating) return;
+        const wasHeld = rotateHold;
+        evaluateMissionHold();
+        if (wasHeld && !rotateHold) {
+          // Reached the bottom — start the dwell timer now.
+          scheduleRotate();
+        } else if (!wasHeld && rotateHold) {
+          clearRotateTimer();
+          syncIndicator(openId);
+        } else if (rotateHold) {
+          clearRotateTimer();
+          if (stage) stage.classList.remove('is-rotating');
+        }
+      },
+      { passive: true },
+    );
+  }
+
+  // --- Founder jump links + hover preview ---------------------------------
+  function hidePreview() {
+    if (!preview) return;
+    preview.hidden = true;
+    preview.setAttribute('aria-hidden', 'true');
+  }
+
+  function showPreview(key, anchor) {
+    const data = FOUNDERS[key];
+    if (!preview || !data || !anchor) return;
+    const img = preview.querySelector('.founder-preview-photo');
+    const name = preview.querySelector('.founder-preview-name');
+    const role = preview.querySelector('.founder-preview-role');
+    if (img) {
+      img.src = data.photo;
+      img.alt = `Portrait of ${data.name}`;
+    }
+    if (name) name.textContent = data.name;
+    if (role) role.textContent = data.role;
+
+    preview.hidden = false;
+    preview.setAttribute('aria-hidden', 'false');
+
+    const rect = anchor.getBoundingClientRect();
+    const pad = 12;
+    const pw = preview.offsetWidth || 280;
+    const ph = preview.offsetHeight || 80;
+    let left = rect.left;
+    let top = rect.bottom + 8;
+    if (left + pw > win.innerWidth - pad) left = win.innerWidth - pw - pad;
+    if (left < pad) left = pad;
+    if (top + ph > win.innerHeight - pad) top = rect.top - ph - 8;
+    if (top < pad) top = pad;
+    preview.style.left = `${Math.round(left)}px`;
+    preview.style.top = `${Math.round(top)}px`;
+  }
+
+  function scrollToFounder(key) {
+    const data = FOUNDERS[key];
+    if (!data) return;
+    const el = doc.getElementById(data.id);
+    if (!el || !rail) return;
+
+    // Ensure mission is open so the founder cards exist in layout.
+    if (openId !== 'mission') {
+      openPanel('mission', { updateUrl: true, focus: false, restartRotate: true });
+    }
+
+    raf(() => {
+      const railRect = rail.getBoundingClientRect();
+      const elRect = el.getBoundingClientRect();
+      const nextTop = rail.scrollTop + (elRect.top - railRect.top) - 16;
+      rail.scrollTo({
+        top: Math.max(0, nextTop),
+        behavior: prefersReducedMotion() ? 'auto' : 'smooth',
+      });
+      el.classList.add('is-targeted');
+      try {
+        el.focus({ preventScroll: true });
+      } catch {
+        el.focus();
+      }
+      win.setTimeout(() => el.classList.remove('is-targeted'), 1600);
+      // After jumping to bios, treat mission as read so rotate can resume.
+      evaluateMissionHold();
+      if (rotating && !rotateHold) scheduleRotate();
+    });
+  }
+
+  doc.querySelectorAll('.founder-jump').forEach((link) => {
+    const key = link.getAttribute('data-founder');
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      hidePreview();
+      scrollToFounder(key);
+    });
+    link.addEventListener('mouseenter', () => showPreview(key, link));
+    link.addEventListener('mouseleave', hidePreview);
+    link.addEventListener('focus', () => showPreview(key, link));
+    link.addEventListener('blur', hidePreview);
   });
 
   // Contact: close panels / pause rotate, then allow normal hash scroll.
@@ -240,7 +410,6 @@ export function initNav(doc) {
 
   doc.querySelectorAll('[data-close-panel]').forEach((el) => {
     el.addEventListener('click', (e) => {
-      // Logo returns to mission and resumes the carousel.
       e.preventDefault();
       openPanel('mission', { updateUrl: true, focus: false, restartRotate: true });
       win.scrollTo({ top: 0, behavior: prefersReducedMotion() ? 'auto' : 'smooth' });
@@ -249,6 +418,7 @@ export function initNav(doc) {
 
   doc.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' || e.key === 'Esc') {
+      hidePreview();
       if (state.open) dispatch({ type: 'ESCAPE' });
     }
   });
@@ -257,6 +427,9 @@ export function initNav(doc) {
     const id = (win.location.hash || '').slice(1);
     if (PANEL_IDS.includes(id)) {
       openPanel(id, { updateUrl: false, focus: false, restartRotate: true });
+    } else if (id === 'founder-mark' || id === 'founder-gabriel') {
+      openPanel('mission', { updateUrl: false, focus: false, restartRotate: true });
+      raf(() => scrollToFounder(id === 'founder-mark' ? 'mark' : 'gabriel'));
     } else if (id === 'contact') {
       closePanel({ updateUrl: false });
       applyActive('contact');
@@ -275,16 +448,11 @@ export function initNav(doc) {
     else if (typeof reduceMql.addListener === 'function') reduceMql.addListener(onReduce);
   }
 
-  // Pause rotation while the tab is hidden.
   doc.addEventListener('visibilitychange', () => {
     if (doc.visibilityState === 'hidden') {
-      if (rotateTimer !== null) {
-        win.clearTimeout(rotateTimer);
-        rotateTimer = null;
-      }
-    } else if (rotating && openId) {
+      clearRotateTimer();
+    } else if (rotating && openId && !rotateHold) {
       scheduleRotate();
-      syncIndicator(openId);
     }
   });
 
@@ -313,6 +481,25 @@ export function initNav(doc) {
   win.addEventListener('resize', schedule, { passive: true });
   updateScrollChrome();
 
+  // Re-check mission hold on resize (overflow may appear/disappear).
+  win.addEventListener(
+    'resize',
+    () => {
+      if (openId !== 'mission' || !rotating) return;
+      const wasHeld = rotateHold;
+      evaluateMissionHold();
+      if (wasHeld !== rotateHold) {
+        if (rotateHold) {
+          clearRotateTimer();
+          syncIndicator(openId);
+        } else {
+          scheduleRotate();
+        }
+      }
+    },
+    { passive: true },
+  );
+
   // --- Breakpoint ---------------------------------------------------------
   function onBreakpoint() {
     dispatch({ type: 'BREAKPOINT', isMobile: isMobileNow() });
@@ -323,12 +510,16 @@ export function initNav(doc) {
     else if (typeof mql.addListener === 'function') mql.addListener(onBreakpoint);
   } else {
     let lastMobile = state.isMobile;
-    win.addEventListener('resize', () => {
-      const m = isMobileNow();
-      if (m !== lastMobile) {
-        lastMobile = m;
-        onBreakpoint();
-      }
-    }, { passive: true });
+    win.addEventListener(
+      'resize',
+      () => {
+        const m = isMobileNow();
+        if (m !== lastMobile) {
+          lastMobile = m;
+          onBreakpoint();
+        }
+      },
+      { passive: true },
+    );
   }
 }
